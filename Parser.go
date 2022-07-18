@@ -43,13 +43,8 @@ func LoadFromFile(name string, info Inforamation) {
 
 func LoadFromString(scanner *bufio.Scanner, info Inforamation) {
 
-	var section string
-	m := make(map[string]map[string]string)
-	cont := make(map[string]string)
-	length := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		
+	line := scanner.Text()
+		items := strings.Split(line, " ")
 
 		if items[0] == ";" {
 
@@ -60,20 +55,28 @@ func LoadFromString(scanner *bufio.Scanner, info Inforamation) {
 
 		} else if Checking(items[0]) {
 			section = items[0]
+			d[section] = make(map[string]string)
+
+		} else if len(items) == 1 && items[0] == " " {
+			section = " "
 
 		} else {
+
 			split_equal := strings.Split(line, "=")
 
-			fmt.Println(len(split_equal), split_equal[0])
 			if len(split_equal) == 2 {
-				cont[split_equal[0]] = split_equal[1]
-				m[section] = cont
+
+				key = split_equal[0]
+				value = split_equal[1]
+
+				d[section][key] = value
 
 			}
+
 		}
 
 	}
-	info.Data = m
+	info.Data = d
 
 	fmt.Println(info.Data)
 
