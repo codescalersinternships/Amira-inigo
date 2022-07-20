@@ -32,6 +32,10 @@ func (p *Parser) SetValues(section, key, value string) {
 
 	p.Data[section][key] = value
 }
+func (p *Parser) GetSections() map[string]map[string]string {
+
+	return p.Data
+}
 
 func (p *Parser) GetSectionNames() []string {
 
@@ -41,7 +45,6 @@ func (p *Parser) GetSectionNames() []string {
 
 	}
 
-	fmt.Println("sections are :", keys)
 	return keys
 }
 
@@ -64,13 +67,15 @@ func (p *Parser) SearchSection(section string) (err error) {
 	return nil
 }
 func (p *Parser) SetSections(section string) {
+	if len(p.Data) == 0 {
+		p.Data = map[string]map[string]string{}
+	}
 	_, ok := p.Data[section]
 	if !ok {
-		fmt.Println("setsections1")
 
 		p.Data[section] = make(map[string]string)
 	}
-	fmt.Println("setsections")
+
 }
 
 func (p *Parser) SaveToFile(name string, dictionary map[string]map[string]string) (err error) {
@@ -102,6 +107,7 @@ func (p *Parser) LoadFromFile(name string) error {
 	if ferr != nil {
 		return errors.New("can't open the file with this name")
 	}
+
 	content := string(f)
 
 	return p.LoadFromString(string(content))
@@ -110,8 +116,26 @@ func (p *Parser) LoadFromFile(name string) error {
 func (p *Parser) LoadFromString(content string) (err error) {
 
 	err = p.Parse(content)
+	fmt.Println("error", err)
 	return err
-	
+
+}
+func checkLine(line string) (string, error) {
+	splits := strings.Split(line, " ")
+	equal := strings.Split(line, "=")
+	if isValidSectionName(splits[0]) {
+		return "section", nil
+
+	} else if splits[0] == ";" {
+		return "comment", nil
+
+	} else if line == "\n" {
+		return "empty", nil
+
+	} else if len(equal) == 2 {
+		return "KeyValue", nil
+	}
+	return "", errors.New("Invalid input")
 }
 
 func (p *Parser) Parse(content string) (err error) {
@@ -132,6 +156,7 @@ func (p *Parser) Parse(content string) (err error) {
 
 		} else if isValidSectionName(items[0]) {
 			section = items[0]
+
 			p.SetSections(section)
 			SectionFlag = true
 
@@ -142,17 +167,16 @@ func (p *Parser) Parse(content string) (err error) {
 
 				key = split_equal[0]
 				value = split_equal[1]
-
 				p.SetValues(section, key, value)
 
-			} else {
+			} else if len(split_equal) > 2 {
 				return errors.New("more than one value")
+			} else if len(line) != 0 {
+				return errors.New("Invalid input Name")
 			}
 
-		} else if len(items) == 1 {
-			if items[0] == " " {
-
-			}
+		} else if len(line) == 0 {
+			continue
 
 		} else {
 
@@ -164,16 +188,3 @@ func (p *Parser) Parse(content string) (err error) {
 	return err
 }
 
-
-
-
-
-func main() {
-	Data := make(map[string]map[string]string)
-	var info Parser
-	var name = "text.INI"
-	info.LoadFromFile(name)
-	fmt.Println("printed from main", Data)
-	info.SaveToFile("name.txt", info.Data)
-
-}
