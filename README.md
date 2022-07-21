@@ -3,7 +3,9 @@ INI Parser
 
 Go package provides read and write for INI files.
 
+
 Features
+
 
 Load from files and strings. 
 
@@ -17,7 +19,10 @@ Get parsed data as a string.
 
 Export parsed data to INI file.
 
+
 How To Use
+
+
 
 parser := Parser{}
 
@@ -43,7 +48,9 @@ port = 143
 
 file = "payroll.dat"`
 
+
 parser.LoadFromString(iniText)
+
 
 use parser.SetValues and sections("Section","Key","Value") to set keys and values to existing section
 
